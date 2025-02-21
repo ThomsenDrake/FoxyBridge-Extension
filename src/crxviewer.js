@@ -845,11 +845,7 @@ var viewFileInfo = (function() {
             }
         }
 
-//#if WEB
-//      var permalink = location.origin + location.pathname;
-//#else
         var permalink = 'https://robwu.nl/crxviewer/';
-//#endif
 
         permalink += '?' + encodeQueryString(params);
         return permalink;
@@ -1484,15 +1480,12 @@ var checkAndApplyFilter = (function() {
     }
     (function() {
         // Bind to checkbox filter
-//#if CHROME || OPERA || FIREFOX
         var storageArea = chrome.storage.sync;
-//#endif
 
         var FILTER_STORAGE_PREFIX = 'filter-';
         var fileList = document.getElementById('file-list');
         var checkboxes = document.querySelectorAll('input[data-filter-type]');
 
-//#if !CHROME && !OPERA
         if (!checkboxes.length) return;
         // In Firefox, checkbox elements don't respect width/height style for checkbox.
         // Resize it if needed.
@@ -1504,35 +1497,23 @@ var checkAndApplyFilter = (function() {
         if (actualHeight && expectedHeight && actualHeight !== expectedHeight) {
             scaleFactor = expectedHeight / actualHeight;
         }
-//#endif
         [].forEach.call(checkboxes, function(checkbox) {
-//#if !CHROME && !OPERA
             if (scaleFactor !== 1) {
                 checkbox.style.transformOrigin = '0 0';
                 checkbox.style.transform = 'scale(' + scaleFactor + ')';
             }
-//#endif
             var storageKey = FILTER_STORAGE_PREFIX + checkbox.dataset.filterType;
             checkbox.checked = localStorage.getItem(storageKey) !== '0';
             checkbox.onchange = function() {
-//#if CHROME || OPERA || FIREFOX
                 var items = {};
                 items[storageKey] = checkbox.checked;
                 storageArea.set(items);
-//#else
-                localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
-//#endif
                 updateFileListView();
             };
-//#if CHROME || OPERA || FIREFOX
                 storageArea.get(storageKey, function(items) {
                     checkbox.checked = items[storageKey] !== false;
                     updateFileListView();
                 });
-//#else
-                localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
-                updateFileListView();
-//#endif
             function updateFileListView() {
                 fileList.classList.toggle('gfilter-' + checkbox.dataset.filterType, !checkbox.checked);
                 // Save filter state for renderTotalFileSize.
@@ -1563,11 +1544,6 @@ function initialize() {
     // When getPlatformInfoAsync is called first, more accurate information may
     // be returned by getPlatformInfo(), so do that now.
     getPlatformInfoAsync(initialize2);
-//#if CHROME
-    // TODO: Remove sometime in the future. This removes obsolete data that
-    // was stored by an older version of the chrome-platform-info.js file.
-    localStorage.removeItem('platformInfo');
-//#endif
 }
 function initialize2() {
     if (getParam('noview')) {
@@ -1693,11 +1669,7 @@ function showAdvancedOpener() {
             } else {
                 amoOptions.classList.add('disabled-site');
             }
-//#if FIREFOX
             reorderForms(maybeXpi || !maybeCrx);
-//#else
-//          reorderForms(maybeXpi);
-//#endif
             return;
         }
         function setOptionFromUrl(key) {
@@ -1994,13 +1966,9 @@ function appendFileChooser() {
     progressDiv.hidden = false;
     progressDiv.insertAdjacentHTML('beforeend',
             '<br><br>' +
-//#if !WEB
             'Visit the Chrome Web Store, Opera\'s or Firefox\'s add-on gallery<br>' +
             'and click on the CRX button to view its source.' +
             '<br><br>Or select a .crx/.nex/.xpi/.zip file:' +
-//#else
-            'Select a .crx/.nex/.xpi/.zip file:' +
-//#endif
             '<br><br>');
     var fileChooser = document.createElement('input');
     fileChooser.type = 'file';
@@ -2077,12 +2045,6 @@ function loadNonCrxUrlInViewer(url, human_readable_name, onHasBlob, onHasNoBlob)
     try {
         var x = new XMLHttpRequest();
         x.open('GET', requestUrl);
-//#if OPERA
-        // Required for access to addons.opera.com, see get_equivalent_download_url
-        if (requestUrl.startsWith('https://cors-anywhere.herokuapp.com/')) {
-            x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        }
-//#endif
         x.responseType = 'blob';
         x.onerror = function() {
             onHasNoBlob('Network error for ' + url);
@@ -2124,9 +2086,6 @@ function loadUrlInViewer(crx_url, onHasBlob) {
         loadNonCrxUrlInViewer(crx_url, crx_url, onHasBlob, function(err) {
             progressDiv.textContent = err;
             appendFileChooser();
-//#if CHROME
-            maybeShowPermissionRequest();
-//#endif
         });
         return;
     }
@@ -2134,37 +2093,8 @@ function loadUrlInViewer(crx_url, onHasBlob) {
     openCRXasZip(crx_url, onHasBlob, function(error_message) {
         progressDiv.textContent = error_message;
         appendFileChooser();
-//#if CHROME
-        maybeShowPermissionRequest();
-//#endif
     }, progressEventHandler);
 
-//#if CHROME
-    function maybeShowPermissionRequest() {
-        var permission = {
-            origins: ['*://*/*']
-        };
-        chrome.permissions.contains(permission, function(hasAccess) {
-            if (hasAccess) return;
-            var grantAccess = document.createElement('button');
-            var checkAccessOnClick = function() {
-                chrome.permissions.request(permission, function(hasAccess) {
-                    if (!hasAccess) return;
-                    grantAccess.parentNode.removeChild(grantAccess);
-                    loadUrlInViewer(crx_url, onHasBlob);
-                });
-            };
-            grantAccess.onclick = checkAccessOnClick;
-            progressDiv.insertAdjacentHTML('beforeend', '<br><br>' +
-                'To view this extension\'s source, an extra permission is needed.<br>' +
-                'This permission can be revoked at any time at the ' +
-                '<a href="/options.html" target="_blank">options page</a>.<br><br>'
-            );
-            grantAccess.textContent = 'Add permission';
-            progressDiv.appendChild(grantAccess);
-        });
-    }
-//#endif
     function progressEventHandler(xhrProgressEvent) {
         if (xhrProgressEvent.lengthComputable) {
             var loaded = xhrProgressEvent.loaded;
@@ -2261,7 +2191,6 @@ function publicKeyToExtensionId(base64encodedKey) {
     }
     return extensionId;
 }
-//#if FIREFOX
 document.addEventListener('click', function(event) {
     if (event.button !== 0) return;
     var a = event.target.closest('a');
@@ -2274,4 +2203,4 @@ document.addEventListener('click', function(event) {
         filename: a.download,
     });
 });
-//#endif
+

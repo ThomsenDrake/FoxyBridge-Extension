@@ -253,3 +253,4 @@ SearchTask.prototype.sendResults = function(forceSend) {
     this.found.length = 0;
     this.notfound.length = 0;
 };
+

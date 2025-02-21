@@ -1,3 +1,6 @@
 *.swp
 node_modules/
 dist/
+crxviewer
+src-old
+src-new

@@ -152,3 +152,4 @@ if (typeof module !== 'undefined') {
         parseMozCOSE,
     };
 }
+

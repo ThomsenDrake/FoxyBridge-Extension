@@ -125,3 +125,4 @@ function getPlatformInfoFallback() {
         nacl_arch: arch
     };
 }
+

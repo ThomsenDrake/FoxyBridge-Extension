@@ -15,9 +15,7 @@
     var MENU_ID_PAGE = 'nl.robwu.contextmenu.crxpage';
     var MENU_ID_AMO_APPROVED_LINK = 'nl.robwu.contextmenu.amoapprovedlink';
     var MENU_ID_AMO_APPROVED_PAGE = 'nl.robwu.contextmenu.amoapprovedpage';
-//#if FIREFOX
     var MENU_ID_PAGE_ACTION = 'nl.robwu.contextmenu.pageaction';
-//#endif
     var MENU_ID_ACTION_MENU = 'nl.robwu.contextmenu.actionmenu.';
     var MENU_ID_ACTION_MENU_POPUP = MENU_ID_ACTION_MENU + 'popup';
     var MENU_ID_ACTION_MENU_VIEW_SOURCE = MENU_ID_ACTION_MENU + 'view-source';
@@ -80,7 +78,6 @@
         // registered. Should certainly be less expensive than repeatedly
         // calling contextMenus.create unconditionally.
         // In Chrome: contextMenus.update fails if the menu item already exists.
-//#if FIREFOX
         // In Firefox: contextMenus.update returns early without further
         // validation if the menu item does not exist. If the menu item exists,
         // validation is performed, including verifying that parentId is valid.
@@ -92,13 +89,6 @@
             var hasPersistedMenu = !!chrome.runtime.lastError;
             callback(hasPersistedMenu);
         });
-//#else
-        chrome.contextMenus.update(MENU_ID_DUMMY_NEVER_SHOWN, {}, function() {
-            // Error = menu does not exist, so it was not persisted before.
-            var hasPersistedMenu = !chrome.runtime.lastError;
-            callback(hasPersistedMenu);
-        });
-//#endif
     }
     function markMenuRegistrationCompleted() {
         // Create an invisible menu item. This persists across browser
@@ -144,13 +134,11 @@
             setActionClickAction(items.actionClickAction);
             markMenuRegistrationCompleted();
         });
-//#if FIREFOX
         chrome.contextMenus.create({
             id: MENU_ID_PAGE_ACTION,
             title: 'Hide this button',
             contexts: ['page_action'],
         });
-//#endif
         chrome.contextMenus.create({
             id: MENU_ID_ACTION_MENU,
             title: 'Primary action on click',
@@ -189,14 +177,12 @@
     }
     
     function contextMenusOnClicked(info, tab) {
-//#if FIREFOX
         if (info.menuItemId === MENU_ID_PAGE_ACTION) {
             // background.js will now pick up the storage change
             // and disable page actions.
             chrome.storage.sync.set({showPageAction: false});
             return;
         }
-//#endif
         if (info.menuItemId.startsWith(MENU_ID_ACTION_MENU)) {
             var choice = info.menuItemId.slice(MENU_ID_ACTION_MENU.length);
             chrome.storage.sync.set({actionClickAction: choice});
@@ -216,9 +202,7 @@
             url: chrome.runtime.getURL('crxviewer.html') + '?' + params,
             active: true,
             index: tab ? tab.index + 1 : undefined,
-//#if FIREFOX
             cookieStoreId: tab ? tab.cookieStoreId : undefined,
-//#endif
         });
     }
     chrome.contextMenus.onClicked.addListener(contextMenusOnClicked);
@@ -280,3 +264,4 @@
         chrome.contextMenus.remove(MENU_ID_AMO_APPROVED_PAGE, darkhole);
     }
 })();
+

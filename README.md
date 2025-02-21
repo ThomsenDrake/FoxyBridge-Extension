@@ -1,59 +1,44 @@
-# Chrome extension source viewer (CRX Viewer)
+# FoxyBridge Extension
 
-View the source code of any Chrome extension in the Chrome Web store without installing it.  
-https://chromewebstore.google.com/detail/chrome-extension-source-v/jifpbeccnghkjeaalbbjmodiffmgedin
+This extension is built to work with the [FoxyBridge Chrome Extension Conversion Tool](https://github.com/ThomsenDrake/FoxyBridge), which must be installed separately.
 
-Also available for Opera and Opera's add-on gallery.  
-https://addons.opera.com/extensions/details/extension-source-viewer/
+## Key Features
 
-And also available for Firefox and addons.mozilla.org (WebExtensions and other Firefox addon types).
-https://addons.mozilla.org/firefox/addon/crxviewer/
+- ~~Seamlessly integrates with the FoxyBridge conversion tool to enhance extension workflows.~~ **feature in development**
+- Download and view the source code of browser extensions from multiple extension stores.
+- Built on the robust, prebuilt Firefox version of crxviewer.
+- Provides an intuitive interface for exploring extension files across platforms.
 
-Online demo (select a .crx / .nex / .zip / .xpi from your disk or a URL to try out the viewer):  
-https://robwu.nl/crxviewer/
+## Roadmap
 
-## Features
+- Automatically trigger a FoxyBridge conversion on extension downloaad
+- Automatically install converted extension
+- Replace "Add to Chrome" button with "Add to Firefox" button that initiates extension download
 
-This Chrome extension adds a button to right of the omnibox when a CRX file has been detected.
-This button appears in the following extension stored:
+## Setup Instructions
 
-  - Chrome Web Store
-  - Opera add-ons gallery
-  - Firefox add-ons gallery
-  - Thunderbird add-ons gallery
-  - Microsoft Edge Addons store
+1. Install the [FoxyBridge Chrome Extension Conversion Tool](https://github.com/ThomsenDrake/FoxyBridge) separately.
+2. Download or clone this repository.
+3. In the project root, run:
+   ```bash
+   npm install
+   ```
+   to install the required dependencies.
+4. Build the extension by running:
+   ```bash
+   node make.js
+   ```
+   This creates a new folder called **dist** containing the built extension.
+5. Load the built extension in Firefox:
+   - Open Firefox and navigate to `about:addons`.
+   - Click the gear icon next to "Manage Your Extensions" and select **"Install Add-on From File..."**.
+   - In the dialog, locate the **dist** folder and select the `.xpi` file (typically named `FoxyBridge-Extension.xpi`).
 
-Upon clicking the button, two actions become available:
+## License
 
-  - Download extension as zip file
-  - View source
+(c) 2025 Drake Thomsen (<drake@draket.xyz>)  
 
-The default action (showing the above options) can be changed via the "Primary action on click"
-menu that appears when you right-click on the extension button.
+The core of this extension is built on the prebuilt Firefox version of [crxviewer](https://github.com/Rob--W/crxviewer.git) by [Rob Wu](https://robwu.nl/). Crxviewer is a browser extension that lets users download the source code of other extensions from the Chrome Web Store, Firefox Add-ons site, or Opera extension store. Its repository contains the code for the Chrome, Firefox, and Opera versions, along with an automated build function that handles their minor differences. This extension uses the Firefox build as its foundation and adds functionality to communicate with the FoxyBridge tool installed on the user's computer.
 
-The "View source" option opens a new tab with a simple viewer, with the following features:
-
-  - Download-as-zip and download-as-crx at the upper-right corner.
-  - List of file names, and the option to filter files with a regular expression.
-  - Find files containing a string, or with content matching a regular expression.
-  - Quickly jump between search results, or from/to a specific line.
-  - Automatic beautification (formatting) of code
-  - Syntax highlighting
-  - Image preview
-  - Show hashes (md5, sha1, sha256, sha384, sha512) of the file content.
-  - View content of embedded zip files.
-  - Download Chrome Web Store extensions for a different platform (e.g. Chrome OS or NaCl).
-  - View the contents of any URL or zip file.
-  - Permalink to file and search result within a zip or extension file.
-
-As mentioned before, this extension activates on the Chrome Web Store by default.
-It's also possible to view the source code of Chrome, Opera 15+ and Firefox extensions that are
-hosted elsewhere. Further, there is an option to show a contextmenu entry on links whose target
-is a Chromium extension. Both features can be toggled at the options page.
-
-## Copyright
-(c) 2013 - 2023 Rob Wu <rob@robwu.nl> (https://robwu.nl/)
-
-This Source Code Form is subject to the terms of the Mozilla Public
-License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Licensed under the Mozilla Public License, v. 2.0.  
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.

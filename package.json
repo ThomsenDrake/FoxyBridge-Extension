@@ -1,20 +1,24 @@
 {
-  "name": "crxviewer",
+  "name": "foxybridge-extension",
   "version": "0.0.0",
-  "description": "Tools and dependencies to build CRX viewer.",
+  "description": "Tools and dependencies to build the FoxyBridge extension.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rob--W/crxviewer.git"
+    "url": "https://github.com/ThomsenDrake/FoxyBridge-Extension.git"
   },
-  "author": "Rob Wu <rob@robwu.nl> (https://robwu.nl/)",
+  "author": "Drake Thomsen <drake@draket.xyz> (https://draket.xyz/)",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/Rob--W/crxviewer/issues"
+    "url": "https://github.com/ThomsenDrake/FoxyBridge-Extension/issues"
   },
-  "homepage": "https://github.com/Rob--W/crxviewer#readme",
+  "homepage": "https://github.com/ThomsenDrake/FoxyBridge-Extension#readme",
   "private": true,
   "devDependencies": {
     "less": "^2.7.1",
     "shelljs": "^0.8.5"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^0.21.1"
   }
 }

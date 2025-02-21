@@ -5,7 +5,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this
  file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-//#expand Revision __VERSION__
+Revision d64c421cb20ed341f7178c0fb04172da353be9ac
  -->
 <html>
 <head>
@@ -146,12 +146,8 @@ The filename filter is optional, '!search term' can also be used directly to sea
     <option value="!regexp:(chrome|browser)\." label="Regexp file search">
     <option value="\.html$!http:" label="All HTML files containing http:.">
 </datalist>
-<!--#if CHROME || OPERA || FIREFOX-->
 <script src="storage-sync-polyfill.js"></script>
-<!--#endif-->
-<!--#if FIREFOX-->
 <script src="domain-fronter.js"></script>
-<!--#endif-->
 <script src="lib/zip.js/zip.js"></script>
 <script src="lib/zip.js/mime-types.js"></script>
 <script src="lib/efficienttextwriter.js"></script>
@@ -172,3 +168,4 @@ The filename filter is optional, '!search term' can also be used directly to sea
 <script src="crxviewer.js"></script>
 </body>
 </html>
+

@@ -37,11 +37,7 @@ function initialize() {
         crx_url = get_crx_url(cws_url);
         filename = get_zip_name(crx_url);
         if (!can_viewsource_crx_url(crx_url)) {
-//#if FIREFOX
             chrome.pageAction.hide(tabs[0].id);
-//#else
-            chrome.action.disable(tabs[0].id);
-//#endif
             window.close();
             return;
         }
@@ -64,9 +60,6 @@ function initialize() {
 function ready() {
     document.getElementById('download').onclick = doDownload;
     document.getElementById('view-source').onclick = doViewSource;
-//#if OPERA
-    document.getElementById('install-as-nex').onclick = doInstall;
-//#endif
     // When the settings have been read, ready2 will run to finish.
 }
 function ready2() {
@@ -106,9 +99,7 @@ function doViewSource() {
                 '?' + encodeQueryString({crx: crx_url, zipname: filename}),
             active: true,
             index: tabs && tabs.length ? tabs[0].index + 1 : undefined,
-//#if FIREFOX
             cookieStoreId: tabs && tabs[0] && tabs[0].cookieStoreId,
-//#endif
         }, function() {
             window.close();
         });
@@ -127,61 +118,18 @@ function onXHRprogress(progressContainer, xhrProgressEvent) {
         progressBar.removeAttribute('value');
     }
 }
-//#if OPERA
-var hasDownloadedCRX = false;
-function doInstall() {
-    var filename_nex = filename.replace(/\.zip$/, '.nex');
-
-    if (hasDownloadedCRX) {
-        console.log('Download is pending.');
-        return;
-    }
-    var x = new XMLHttpRequest();
-    x.open('GET', crx_url);
-    x.responseType = 'blob';
-    x.onprogress = onXHRprogress.bind(null, document.getElementById('install-as-nex'));
-    x.onload = function() {
-        var blob = x.response;
-        if (!blob) {
-            hasDownloadedCRX = false;
-            alert('Unexpected error: no response for ' + crx_url);
-            return;
-        }
-        if (blob.type !== 'application/x-navigator-extension' ||
-            blob.type !== 'application/x-chrome-extension') {
-            blob = new Blob([blob], {
-                type: 'application/x-navigator-extension'
-            });
-        }
-        tryTriggerDownload(blob, filename_nex);
-    };
-    x.onerror = function() {
-        hasDownloadedCRX = false;
-        alert('Network error for ' + crx_url);
-    };
-    x.onabort = function() {
-        hasDownloadedCRX = false;
-    };
-    x.send();
-    hasDownloadedCRX = true;
-}
-//#endif
 
 function tryTriggerDownload(blob, filename) {
     chrome.downloads.download({
         url: URL.createObjectURL(blob),
         filename: filename
     }, function() {
-//#if FIREFOX
         // In Firefox, closing too soon may prevent the download from completing
         // due to blob:-URL invalidation. So wait a little bit before actually
         // closing the popup.
         setTimeout(function() {
             window.close();
         }, 200);
-//#else
-        // The popup should have closed already, but if not, do it now.
-        window.close();
-//#endif
     });
 }
+

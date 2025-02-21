@@ -146,19 +146,15 @@ function get_crx_url(extensionID_or_url) {
     var product_id = isChromeNotChromium() ? 'chromecrx' : 'chromiumcrx';
     // Channel is "unknown" on Chromium on ArchLinux, so using "unknown" will probably be fine for everyone.
     var product_channel = 'unknown';
-    // As of July 2014, the Chrome Web Store sends 204 responses to user agents when their
+    // As of July, the Chrome Web Store sends 204 responses to user agents when their
     // Chrome/Chromium version is older than version 31.0.1609.0
-    // As of December 2024, the CWS sends 204 responses to Chrome <88.
     var product_version = '9999.0.9999.0';
     // Try to detect the Chrome version, and if it is lower than 31.0.1609.0, use a very high version.
     // $1 = m.0.r.p  // major.minor.revision.patch where minor is always 0 for some reason.
     // $2 = m
     // $3 =     r
-    // NOTE: r is always 0 since Chrome 101 due to the User-Agent String Reduction efforts,
-    // per https://www.chromium.org/updates/ua-reduction/
-    // and https://blog.chromium.org/2021/05/update-on-user-agent-string-reduction.html
     var cr_version = /Chrome\/((\d+)\.0\.(\d+)\.\d+)/.exec(navigator.userAgent);
-    if (cr_version && +cr_version[2] >= 88) {
+    if (cr_version && +cr_version[2] >= 31 && +cr_version[3] >= 1609) {
         product_version = cr_version[1];
     }
 
@@ -266,25 +262,6 @@ function is_cors_enabled_download_url(url) {
 // same result as the requested URL, sans restrictions.
 function get_equivalent_download_url(url) {
     var requestUrl = url;
-//#if WEB
-    if (/^https?:/.test(url) && !is_cors_enabled_download_url(url)) {
-        // Proxy request through CORS Anywhere.
-        requestUrl = 'https://cors-anywhere.herokuapp.com/' + url;
-    }
-//#endif
-//#if OPERA
-    // Opera blocks access to addons.opera.com. Let's bypass this restriction.
-    // Unfortunately, there is no way to retrieve the .crx file in an ordinary way.
-    // If given the extension ID, it is possible to fetch
-    // "https://extension-updates.opera.com/api/omaha/update/?[see get_crx_url for params]"
-    // but using the following x param instead:
-    // "&x=id%3D[extensionID]%26v%3D[old version, e.g. 0]%26installedby%3Dinternal"
-    // and then download the crx from https://addons-extensions.operacdn.com/media/direct/*/*/*.crx
-    // ... but we are given the slug of the store listing, not the extension ID, so we cannot use this.
-    if (ows_download_pattern.test(url)) {
-        requestUrl = 'https://cors-anywhere.herokuapp.com/' + url;
-    }
-//#endif
     return requestUrl;
 }
 
@@ -373,3 +350,4 @@ function encodeQueryString(params) {
         return key + '=' + value;
     }
 }
+

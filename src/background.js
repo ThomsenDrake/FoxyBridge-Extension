@@ -12,7 +12,6 @@
 
 'use strict';
 
-//#if FIREFOX
 /**
  * Logic to toggle visibility of  pageAction if needed.
  *
@@ -44,17 +43,17 @@
 function tabsOnUpdatedCheckPageAction(tabId, changeInfo, tab) {
     showPageActionIfNeeded(tab);
 }
-//// In Firefox >= 59, we rely on page_action.show_matches.
+  // In Firefox >= 59, we rely on page_action.show_matches.
 var hasStaticPageActionPatterns = !/Firefox\/5[0-8]\./.test(navigator.userAgent);
 var pageActionIsEnabled = hasStaticPageActionPatterns;
-//// We immediately respond to tabs.onUpdated events to minimize the chance of
-//// tab.url getting out of sync. This event may trigger before we read the
-//// user's preference through storage.sync. Once we got the user's preference,
-//// we fix up any touched tabs and void this set.
+  // We immediately respond to tabs.onUpdated events to minimize the chance of
+  // tab.url getting out of sync. This event may trigger before we read the
+  // user's preference through storage.sync. Once we got the user's preference,
+  // we fix up any touched tabs and void this set.
 var tabIdsBeforePageActionPrefRead = new Set();
 var hasLostPersistentListener = false;
 
-//// Same patterns as in manifest_firefox.json:
+  // Same patterns as in manifest_firefox.json:
 var page_action_show_matches_patterns = [
     ...cws_match_patterns,
     mea_match_pattern,
@@ -189,7 +188,7 @@ function togglePageActionAcrossAllMatchingTabs() {
     });
 }
 
-//// In event pages, listeners need to be registered at the top level.
+  // In event pages, listeners need to be registered at the top level.
 registerTabsOnUpdatedForPageAction();
 chrome.storage.onChanged.addListener(function(changes, areaName) {
     if (areaName === 'session') {
@@ -252,92 +251,4 @@ function isPageActionNeededForUrl(url) {
     return cws_pattern.test(url) || mea_pattern.test(url) || ows_pattern.test(url) ||
         amo_pattern.test(url) || atn_pattern.test(url);
 }
-//#else
-//// Work-around for crbug.com/1132684: static event_rules disappear after a
-//// restart, so we register rules dynamically instead, on install.
-function registerEventRules() {
-    if (registerEventRules.hasRunOnce) {
-        return;
-    }
-    registerEventRules.hasRunOnce = true;
 
-    var pageUrlFilters = [{
-        hostEquals: "chrome.google.com",
-        pathPrefix: "/webstore/detail/"
-    }, {
-        hostEquals: "chromewebstore.google.com",
-        pathPrefix: "/detail/"
-    }, {
-        hostEquals: "microsoftedge.microsoft.com",
-        pathPrefix: "/addons/detail/"
-    }, {
-        hostEquals: "addons.opera.com",
-        pathContains: "extensions/details/"
-    }, {
-        hostEquals: "addons.mozilla.org",
-        pathContains: "addon/"
-    }, {
-        hostSuffix: "addons.mozilla.org",
-        pathContains: "review/"
-    }, {
-        hostEquals: "addons.allizom.org",
-        pathContains: "addon/"
-    }, {
-        hostSuffix: "addons.allizom.org",
-        pathContains: "review/"
-    }, {
-        hostEquals: "addons-dev.allizom.org",
-        pathContains: "addon/"
-    }, {
-        hostSuffix: "addons-dev.allizom.org",
-        pathContains: "review/"
-    }, {
-        hostEquals: "addons.thunderbird.net",
-        pathContains: "addon/"
-    }, {
-        hostSuffix: "addons-stage.thunderbird.net",
-        pathContains: "addon/"
-    }];
-
-    if (!chrome.declarativeContent.ShowAction) {
-        // Chrome < 97.
-        chrome.declarativeContent.ShowAction = chrome.declarativeContent.ShowPageAction;
-    }
-
-    var rule = {
-        conditions: pageUrlFilters.map(function(pageUrlFilter) {
-            return new chrome.declarativeContent.PageStateMatcher({
-                pageUrl: pageUrlFilter,
-            });
-        }),
-        actions: [
-            new chrome.declarativeContent.ShowAction(),
-        ],
-    };
-
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-        chrome.declarativeContent.onPageChanged.addRules([rule], function() {
-            // Visibility of action fully controlled by declarativeContent.
-            chrome.action.disable();
-        });
-    });
-}
-//// The documentation recommends to use runtime.onInstalled to register
-//// declarativeContent rules. Due to bugs, additional work-arounds are needed
-//// to ensure that the declarativeContent rules are registered correctly.
-chrome.runtime.onInstalled.addListener(registerEventRules);
-//// Work-around for crbug.com/388231: onInstalled is not fired when the
-//// extension was disabled during an update.
-chrome.runtime.onStartup.addListener(registerEventRules);
-//// Work-around for crbug.com/264963: onInstalled is not fired when the
-//// extension is run in incognito mode. Although not documented, incognito
-//// contexts have their own declarativeContent rule store.
-if (chrome.extension.inIncognitoContext) {
-    chrome.declarativeContent.onPageChanged.getRules(function(rules) {
-        if (!rules.length) {
-            registerEventRules();
-        }
-    });
-}
-
-//#endif
