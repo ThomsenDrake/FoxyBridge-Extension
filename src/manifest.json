@@ -59,5 +59,16 @@
         "webRequest",
         "webRequestBlocking",
         "*://*/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://chrome.google.com/webstore/detail/*",
+                "*://chromewebstore.google.com/detail/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
     ]
 }
